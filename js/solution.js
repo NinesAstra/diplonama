@@ -8,25 +8,20 @@ const share = document.querySelector('.share');
 const comments = document.querySelector('.comments');
 const draw = document.querySelector('.draw');
 const menuCopy = document.querySelector('.menu_copy');
-const menuUrl = document.querySelector('.menu__url');	
+const menuUrl = document.querySelector('.menu__url');
+const mode = document.querySelectorAll('.mode');	
 // const share = document.querySelector('.share');
 
 // burger.style.display = 'none'; вид по заданию
 
 function getImg() {
 	let imgFromStorage = JSON.parse(localStorage.img);
-	// console.log(imgFromStorage);
 	currentImg.src = imgFromStorage.url;
 }
 
-// function getLink() {
-// 	let linkFromStorage = JSON.parse(localStorage.link);
-// 	console.log(linkFromStorage);
-// }
 
 if (localStorage.length !== 0) {
 	getImg();
-	// getMenuDefault(); 
 	getMenuSelectedShare();
 } else {
 	
@@ -44,7 +39,6 @@ document.addEventListener("blur", clearStorage);
 
 function clearStorage() {
 	localStorage.clear();
-	//  console.log("ура")
 };
 
 
@@ -166,7 +160,6 @@ function onSelectFilesDrop(event) {
 
 function onSecondDrop(event) {
 	event.preventDefault();
-	// wrap.removeEventListener('drop', onSelectFilesDrop);
 	alert("Воспользользуйтесь опцией «Загрузить новое»");
 }
 
@@ -188,13 +181,9 @@ const send = function() {
 		xhr.open('POST', 'https://neto-api.herokuapp.com/pic', /* async = */ true);
 		xhr.send(formData);
 	} else {
-	// clearStorage();
-	// getImg();
-	
-	error.style.display = "block";
-	// console.log('говно');
-	return;
-}
+		error.style.display = "block";
+		return;
+	}
 }; 
 
 
@@ -205,17 +194,37 @@ function onLoadStart() {
 function onLoadEnd(response) {
 	try {
 		loader.style.display = 'none';
-		const imageObject = JSON.parse(response);
-		currentImg.src = imageObject.url;
-		// menuUrl.value = currentImg.src;
-		menuUrl.value = 'https://neto-api.herokuapp.com/pic/' + imageObject.id;
-		// console.log(document.location.href);
-		// menuUrl.value = JSON.parse(document.location.href);
-		// console.log(menuUrl.value);
-		getWsSrc (imageObject.id);
+
+    // menu.dataset.state = 'selected';
+    // mode.forEach(elem => elem.dataset.state = '');
+    // share.dataset.state = 'selected';
+
+    const imageObject = JSON.parse(response);
+
+ // currentImg.addEventListener('load', () => {
+ //        // createCommentsWrap();
+ //        // createCanvas();
+ //        // createUserImg();
+ //        // updateComments(res.comments);
+ //        // drawUsersStrokes(res.mask);
+ //        currentImg.dataset.load = 'load';
+ //    });
+
+
+ currentImg.src = imageObject.url;
+
+// window.history.pushState(null, null, url);
+const url = document.location.href.split('?')[0] + '?id=' + imageObject.id;
+console.log(url);
+
+		// const url = 'https://maxxapok.github.io/diplonama/index.html' + '?id=' + imageObject.id;
+		menuUrl.value = url;
+
+		window.history.pushState(null, null, url);
+
+		getWsSrc(imageObject.id);
 		setTimeout(currentImgDisplay, 1000);
 		saveImg(imageObject);
-		// saveLink(imageObject);
 		getMenuSelectedShare();
 
 		wrap.removeEventListener('drop', onSelectFilesDrop);
@@ -245,13 +254,11 @@ function getMenuSelectedDraw() {
 
 function getMenuDefault() {
 	menu.dataset.state = 'default';
-	// burger.dataset.state = "default";
 	const menuItemsWithDataAttr = document.querySelectorAll(".menu__item[data-state]");
 	
 	for (let item of menuItemsWithDataAttr) {
 		item.dataset.state = 'default';
-    // console.log(item);
-}
+	}
 }
 
 function currentImgDisplay() {
@@ -260,7 +267,6 @@ function currentImgDisplay() {
 
 function saveImg(img) { 
 	localStorage.img = JSON.stringify(img);
-	// console.log('длина локалсторедж '+localStorage.length);
 }
 
 
@@ -275,71 +281,7 @@ function copyToBuffer() {
 	document.execCommand('copy');
 }
 
-
-
-
-// копируем ссылку по клику на кнопку "Копировать" в режиме "Поделиться"
-// const copyUrl = document.querySelector('.menu_copy');  
-// copyUrl.addEventListener('click', function(event) {  
-// 	// выбрали текст
-// 	menuShare.select();
-// 	try {  
-// 		//выполним команду копирования	
-// 		var successful = document.execCommand('copy');  
-// 		var msg = successful ? 'успешно ' : 'не';  
-// 		console.log(`URL ${msg} скопирован`);  
-// 	} catch(err) {  
-// 		console.log('Ошибка копирования');  
-// 	}  
-// 	window.getSelection().removeAllRanges();
-// });
-
-// // Получаем из ссылки параметр id
-// let urlString = `${window.location.href}`;
-// console.log(urlString);
-// let url = new URL(urlString);
-// console.log(url);
-// let paramId = url.id;
-// console.log(paramId);
-// urlId();
-
-// function urlId() {
-// 	if (!paramId) { return;	}
-// 	setReview(paramId);
-// 	getMenuSelectedComments();
-// }
-
-// передача по ссылке
-const shareTool = menu.querySelector('.share-tools');
-
-const checkSelectionResult = () => {
-  try {
-    const done = document.execCommand('copy');
-    console.log(`Copy link: ${menuUrl.value}${done ? ' ' : 'not'}done`);
-  } catch (err) {
-    console.error(`Can't copy link. Error: ${err}`);
-  }
-};
-
-const clearSelection = () => {
-  try {
-    window.getSelection().removeAllRanges();
-  } catch (err) {
-    document.selection.empty();
-    console.error(err);
-  }
-};
-
-const copyURL = (event) => {
-  if (event.target.classList.contains('menu_copy')) {
-    menuUrl.select();
-    checkSelectionResult();
-    clearSelection();
-  }
-};
-
-shareTool.addEventListener('click', copyURL);
-
+// передачка по ссылке!!!
 
 
 
@@ -363,8 +305,6 @@ menuCopy.addEventListener('click',copyToBuffer);
 
 // сделать переход по ссылке!!!
 
-// скрыть образец формы комментария
-// 
 // доделать чтоб менюшка оставалась на месте
 
 // комменты должны сохраняться при обновлении страницы
@@ -382,7 +322,6 @@ const menuToggleTitleOff = document.querySelector('.menu__toggle-title_off');
 const menuToggleBg = document.querySelector('.menu__toggle-bg');
 
 let commentsFormCol = document.querySelectorAll('.comments__form');
-// let newCommentForm = commentsFormCol[0].cloneNode(true);
 
 function menuToggleGetOn() {
 
@@ -405,49 +344,40 @@ menuToggleTitleOn.addEventListener('click', menuToggleGetOn);
 menuToggleOff.addEventListener('click', menuToggleGetOff);
 menuToggleTitleOff.addEventListener('click', menuToggleGetOff);
 document.addEventListener('DOMContentLoaded', menuToggleGetOn);
- 
+
 wrap.addEventListener('click', addCommentForm);
 
 
 function addCommentForm(event) {
 
-if (!event.target.classList.contains('current-image')) {
- return;
-} else {
-	let newCommentForm = commentsFormCol[0].cloneNode(true);
-	newCommentForm.style.top = event.pageY + 'px';
-	newCommentForm.style.left = event.pageX + 'px';
-	let divToRemoveCol = newCommentForm.querySelectorAll('.comment');
+	if (!event.target.classList.contains('current-image')) {
+		return;
+	} else {
+		let newCommentForm = commentsFormCol[0].cloneNode(true);
+		newCommentForm.style.top = event.pageY + 'px';
+		newCommentForm.style.left = event.pageX + 'px';
+		let divToRemoveCol = newCommentForm.querySelectorAll('.comment');
 
-	for (let item of divToRemoveCol) {
-		item.remove();
-	}
+		for (let item of divToRemoveCol) {
+			item.remove();
+		}
 
-	wrap.appendChild(newCommentForm);
-	let currentInput = newCommentForm.querySelector('.comments__marker-checkbox');
-	currentInput.setAttribute('disabled', 'true');
+		wrap.appendChild(newCommentForm);
+		let currentInput = newCommentForm.querySelector('.comments__marker-checkbox');
+		currentInput.setAttribute('disabled', 'true');
 
 	// обновляем коллекцию
 	commentsFormCol = document.querySelectorAll('.comments__form');
 
-for (let item of commentsFormCol) {
-	let inputToHide = item.querySelector('.comments__marker-checkbox');
-	inputToHide.checked = false;
-}
-currentInput.checked = true; 
+	for (let item of commentsFormCol) {
+		let inputToHide = item.querySelector('.comments__marker-checkbox');
+		inputToHide.checked = false;
+	}
+	currentInput.checked = true; 
 }
 addSubmitListeners();
 }
 
-// function hideLatestForms() {
-// 	for (let item of commentsFormCol) {
-// 		let inputToHide = item.querySelector('.comments__marker-checkbox');
-// 		console.log(inputToHide);
-// 		inputToHide.checked = false;
-// 		console.log(inputToHide);
-// 	}
-// 	// currentInput.checked = true;
-// }
 
 // вебсокет
 
@@ -461,17 +391,14 @@ function openWebsocket(srcWebsocket) {
 	connect = new WebSocket(srcWebsocket);
 	connect.addEventListener('open', chatOpen);
 	connect.addEventListener('message', event => {
-    getMessage(event.data);
-  });
-	// connect.addEventListener('message', getMessage);
-	// console.log (connect.readyState);
+		getMessage(event.data);
+	});
 }
 
 function addSubmitListeners() {
 	let commmentsSubmitCol = document.querySelectorAll('.comments__submit');
-	// console.log(commmentsSubmitCol);
 	for (let item of commmentsSubmitCol) {
-  item.addEventListener('click', sendMessage);
+		item.addEventListener('click', sendMessage);
 	}
 }
 
@@ -484,10 +411,8 @@ function sendMessage(event) {
 
 	event.preventDefault();
 	let commentsSubmitParent = event.target.parentNode;
-	// console.log(commentsSubmitParent);
 	let commentsArea = commentsSubmitParent.querySelector('.comments__input');
 	let commentsText = commentsArea.value;
-    // console.log(commentsText);
 
 	if (commentsText.lenght == 0) {
 		return false;
@@ -495,27 +420,10 @@ function sendMessage(event) {
 	connect.send(commentsText);
 	displayMessage(commentsText, commentsArea);
 
-	// let newCommentDiv = document.createElement('div');
-	// newCommentDiv.classList.add('comment');
-
-	// let newCommentTimeP = document.createElement('p');
-	// newCommentTimeP.classList.add('comment__time');
-	// let now = new Date();
-	// newCommentTimeP.textContent = `${now.getHours()} : ${now.getMinutes()}`;
-	// newCommentDiv.appendChild(newCommentTimeP);
-
-	// let newCommentMessageP = document.createElement('p');
-	// newCommentMessageP.classList.add('comment__message');
-	
-	// newCommentMessageP.textContent = commentsText;
-	// newCommentDiv.appendChild(newCommentMessageP);
-	// commentsArea.before(newCommentDiv);
-
-	// commentsArea.value = '';
 }
 
 function displayMessage(commentsText, commentsArea) {
-		let newCommentDiv = document.createElement('div');
+	let newCommentDiv = document.createElement('div');
 	newCommentDiv.classList.add('comment');
 
 	let newCommentTimeP = document.createElement('p');
@@ -555,36 +463,9 @@ function getMessage(data) {
 				currentCommentsAreaToHide.checked = false;
 
 			}
-		
+			
 
 		}
 	}
-
-	console.log(window.location);
-
-	// 	if (data == '...') {
-	// 	//если пришедшее сообщение равно ..., добавляем .messages-content соответствующий шаблон сообщения
-	// 	console.log(data);
-	// 	const messageLoading = message[0].cloneNode(true);
-	// 	messagesContent.appendChild(messageLoading);
-	// } else {
-	// 	//Когда приходит сообщение не ..., клонируем соответствующий шаблон.Добавляем в него пришедшую инфу и добавляем время. 
-	// 	//Если есть сообщение с шаблона ..., удаляем его. Далее добавляем в .messages-content
-	//   	const message1 = message[1].cloneNode(true);
-	//   	const messageText = message1.querySelector('.message-text');
-	//   	const timestamp = message1.querySelector('.timestamp');
-	//   	const now = new Date();
-
-	//   	messageText.textContent = data;
-	//   	timestamp.textContent = `${now.getHours()} : ${now.getMinutes()}`;
-	//   	if (messagesContent.querySelector('.loading')) {
-	//   		messagesContent.removeChild(messagesContent.querySelector('.loading'));
-	//   	};
-	//   	messagesContent.appendChild(message1);
- //  	}
-
-
-// с вход джона берем лефт и топ
-// 	циклоп проходим коллекцию форм и сравниваем топ и лефт форм с дописывай!
 
 }
